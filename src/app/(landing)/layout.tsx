@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ChevronDown, Globe, Phone, Mail, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { ChevronDown, Globe, Phone, Mail, MapPin } from "lucide-react";
 
 export default function LandingLayout({ children }: { children: React.ReactNode }) {
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);

@@ -72,7 +72,7 @@ export default function ProductPage() {
             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm"
           >
             <ShoppingCart className="w-5 h-5" />
-            <span>Penjualan Baru</span>
+            <span>Transaksi</span>
           </button>
           <button 
             onClick={() => setIsAddModalOpen(true)}
@@ -160,7 +160,7 @@ export default function ProductPage() {
           <div className="bg-white rounded-2xl w-full max-w-3xl shadow-xl overflow-hidden max-h-[90vh] flex flex-col">
             <div className="flex justify-between items-center p-6 border-b border-gray-100">
               <h2 className="text-xl font-bold text-gray-900">
-                {saleComplete ? "Struk Digital" : receiptView ? "Preview Struk" : "Penjualan Baru"}
+                {saleComplete ? "Struk Digital" : receiptView ? "Preview Struk" : "Transaksi"}
               </h2>
               <button onClick={resetSale} className="text-gray-400 hover:text-gray-600 transition-colors"><X className="w-6 h-6" /></button>
             </div>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard, BookOpen, Package, Tag, Lightbulb, LogOut } from "lucide-react";
+import { LayoutDashboard, BookOpen, History, Package, Tag, Lightbulb, LogOut, Plus } from "lucide-react";
 
 export default function UserLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -22,6 +22,11 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
             <BookOpen className="w-5 h-5 text-blue-400" />
             <span className="font-medium">Pembukuan Kas</span>
           </Link>
+          <Link href="/user/riwayat" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+            <History className="w-5 h-5 text-blue-400" />
+            <span className="font-medium">Riwayat Transaksi</span>
+          </Link>
+          
           <Link href="/user/product" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
             <Package className="w-5 h-5 text-blue-400" />
             <span className="font-medium">Product</span>
@@ -36,11 +41,15 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
           </Link>
         </nav>
 
-        <div className="p-4 border-t border-gray-800">
+        <div className="p-4 border-t border-gray-800 flex items-center justify-between">
           <Link href="/auth" className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-gray-800 hover:text-red-300 transition-colors">
             <LogOut className="w-5 h-5" />
             <span className="font-medium">Keluar</span>
           </Link>
+          <button className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm font-medium transition-colors">
+            <Plus className="w-4 h-4" />
+            Tambah
+          </button>
         </div>
       </aside>
 
