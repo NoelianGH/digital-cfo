@@ -1,0 +1,265 @@
+// backend/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ====================================
+// 1. ENUMS
+// ====================================
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum TransactionType {
+  MASUK
+  KELUAR
+  MODAL
+}
+
+enum TransactionCategory {
+  PENJUALAN
+  PEMBELIAN
+  GAJI
+  OPERASIONAL
+  LAINNYA
+}
+
+enum TransactionSource {
+  MANUAL
+  OCR
+  VOICE
+  POS
+}
+
+enum PaymentMethod {
+  TUNAI
+  QRIS
+  TRANSFER
+  KARTU_DEBIT
+  LAINNYA
+}
+
+enum VerificationStatus {
+  DRAFT
+  VERIFIED
+  REJECTED
+}
+
+enum ProductCategory {
+  MAKANAN
+  MINUMAN
+  JASA
+  LAINNYA
+}
+
+enum PromoType {
+  DISKON
+  CASHBACK
+  BUY_ONE_GET_ONE
+  LAINNYA
+}
+
+enum PromoStatus {
+  AKTIF
+  NON_AKTIF
+  EXPIRED
+}
+
+enum FeedbackRating {
+  POOR
+  AVERAGE
+  GOOD
+  EXCELLENT
+}
+
+enum AlertType {
+  FINANCIAL
+  OPERATIONAL
+  STRATEGIC
+}
+
+enum AlertStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+// ====================================
+// 2. MODELS
+// ====================================
+
+model User {
+  id                  String                 @id @default(uuid())
+  name                String
+  email               String                 @unique
+  password            String
+  businessName        String?
+  role                Role                   @default(USER)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  // Relasi dua arah (Back-relations)
+  transactions        Transaction[]
+  products            Product[]
+  promos              Promo[]
+  financialIndicators financial_indicators[]
+  healthScores        health_scores[]
+  actionFeedbacks     action_feedback[]
+  alerts              alerts[]
+  @@map("users")
+}
+model Transaction {
+  id            String              @id @default(uuid())
+  date          DateTime
+  description   String
+  amount        Float
+  type          TransactionType
+  category      TransactionCategory
+  source        TransactionSource   @default(MANUAL)
+  paymentMethod PaymentMethod?      // Opsional, tidak semua transaksi perlu ini
+  status        VerificationStatus  @default(DRAFT)
+  userId        String
+  user          User                @relation(fields: [userId], references: [id])
+  createdAt     DateTime            @default(now())
+  @@map("transactions")
+}
+
+model Product {
+  id          String          @id @default(uuid())
+  name        String
+  category    ProductCategory @default(LAINNYA)
+  price       Float           // Harga jual
+  stock       Int             @default(0)
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  userId      String
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  saleItems   SaleItem[]      // Produk ini pernah dijual di transaksi mana saja
+  @@map("products")
+}
+// SaleItem: detail item per penjualan POS (many-to-many antara Product dan transaksi POS)
+model SaleItem {
+  id          String   @id @default(uuid())
+  qty         Int
+  priceAtSale Float    // Harga saat transaksi terjadi (snapshot, bukan referensi ke product.price)
+  subtotal    Float    // qty * priceAtSale
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  saleId      String
+  sale        Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  @@map("sale_items")
+}
+
+model Sale {
+  id            String        @id @default(uuid())
+  total         Float
+  paymentMethod PaymentMethod @default(TUNAI)
+  receiptCode   String        @unique // Kode struk unik, misal: TRX-20261021-0001
+  createdAt     DateTime      @default(now())
+  // Relasi ke transaksi keuangan (otomatis masuk pembukuan kas)
+  transactionId String?       @unique
+  
+  // Detail item yang dijual
+  items         SaleItem[]
+  @@map("sales")
+}
+model Promo {
+  id          String      @id @default(uuid())
+  title       String      // Nama promo, misal: "Flash Sale Weekend"
+  description String?
+  type        PromoType
+  value       Float       // Nilai diskon: 10 (untuk 10%) atau 5000 (untuk Rp 5.000)
+  minPurchase Float?      // Minimal pembelian untuk dapat promo (opsional)
+  startDate   DateTime
+  endDate     DateTime
+  status      PromoStatus @default(AKTIF)
+  claimedCount Int        @default(0) // Berapa kali promo ini diklaim hari ini
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("promos")
+}
+
+model financial_indicators {
+  id              String          @id @default(uuid())
+  date            DateTime        @default(now())
+  cash_runway     Float           // Estimasi bulan kas bertahan
+  unit_economics  Float           // Profit margin / kontribusi unit
+  trend_analysis  Float           // Persentase pertumbuhan tren (+ / -)
+  period_start    DateTime
+  period_end      DateTime        @default(now())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  health_scores   health_scores[]
+  @@map("financial_indicators")
+}
+model health_scores {
+  id                  String               @id @default(uuid())
+  score               Float                // Nilai 1 - 100
+  category            String               // KRITIS, WASPADA, SEHAT
+  createdAt           DateTime             @default(now())
+  userId              String
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  indicatorsId        String
+  indicators          financial_indicators @relation(fields: [indicatorsId], references: [id], onDelete: Cascade)
+  recommended_actions recommended_actions[]
+  @@map("health_scores")
+}
+
+model actions {
+  id                  String                @id @default(uuid())
+  title               String
+  description         String?
+  trigger_condition   String                // Misal: "KRITIS_CASH_RUNWAY_LOW"
+  impact_score        Float                 // Kriteria SAW (Benefit)
+  urgency_score       Float                 // Kriteria SAW (Benefit)
+  ease_score          Float                 // Kriteria SAW (Benefit)
+  cost_score          Float                 // Kriteria SAW (Cost)
+  recommended_actions recommended_actions[]
+  action_feedback     action_feedback[]
+  @@map("actions")
+}
+model recommended_actions {
+  id               String        @id @default(uuid())
+  preference_value Float         // Nilai V hasil perhitungan SAW
+  rank             Int           // Peringkat 1, 2, 3
+  createdAt        DateTime      @default(now())
+  healthScoreId    String
+  healthScore      health_scores @relation(fields: [healthScoreId], references: [id], onDelete: Cascade)
+  actionId         String
+  action           actions       @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  @@map("recommended_actions")
+}
+
+model action_feedback {
+  id        String         @id @default(uuid())
+  feedback  String?
+  rating    FeedbackRating
+  createdAt DateTime       @default(now())
+  actionId  String
+  action    actions        @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("action_feedback")
+}
+model alerts {
+  id        String      @id @default(uuid())
+  type      AlertType
+  message   String
+  status    AlertStatus @default(OPEN)
+  createdAt DateTime    @default(now())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("alerts")
+}
