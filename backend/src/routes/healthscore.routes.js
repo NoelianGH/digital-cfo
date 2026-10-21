@@ -1,33 +1,29 @@
-// src/routes/healthRoutes.js
 const express = require('express');
 const router = express.Router();
+const healthController = require('../controllers/healthscore.controller');
+const { authenticateToken } = require('../middleware/auth.middleware');
 
 /**
  * @swagger
- * /api/health:
+ * tags:
+ *   name: Health Score
+ *   description: Analisis Kesehatan Keuangan UMKM menggunakan Fuzzy Tsukamoto
+ */
+
+/**
+ * @swagger
+ * /api/health-score:
  *   get:
- *     summary: Cek status server backend
- *     tags: [System]
+ *     summary: Hitung dan ambil skor kesehatan keuangan UMKM terbaru
+ *     tags: [Health Score]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Server berjalan normal
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: ok
- *                 timestamp:
- *                   type: string
- *                   example: 2026-10-15T20:50:00.000Z
+ *         description: Health score berhasil dihitung
+ *       500:
+ *         description: Kesalahan server internal
  */
-router.get('/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-  });
-});
+router.get('/health-score', authenticateToken, healthController.getHealthScore);
 
 module.exports = router;

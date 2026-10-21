@@ -96,12 +96,7 @@ exports.addSales = async (req, res) => {
       return sale; // Kembalikan data struk lengkap
     });
     // 6. Kirim data struk ke frontend untuk dicetak/ditampilkan
-    return res.status(201).json({
-      success: true,
-      message: 'Transaksi kasir berhasil, struk tercetak & otomatis masuk pembukuan kas',
-      data: result,
-    });
-    return res.status(200).json({ success: true, data: transactions });
+    return res.status(201).json({success: true, message: 'Transaksi kasir berhasil, struk tercetak & otomatis masuk pembukuan kas', data: result, });
   } catch (error) {
     console.error('Error fetching transactions:', error);
     res.status(500).json({ success: false, error: 'Internal Server Error' });
