@@ -56,6 +56,8 @@ enum VerificationStatus {
 enum ProductCategory {
   MAKANAN
   MINUMAN
+  KULINER
+  BARANG
   JASA
   LAINNYA
 }
@@ -114,6 +116,8 @@ model User {
   healthScores        health_scores[]
   actionFeedbacks     action_feedback[]
   alerts              alerts[]
+  feedbacks           Feedback[]
+  stores              Store[]
   @@map("users")
 }
 model Transaction {
@@ -217,11 +221,41 @@ model health_scores {
   @@map("health_scores")
 }
 
+// Feedback from users (kritik & saran)
+model Feedback {
+  id        String         @id @default(uuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating    FeedbackRating
+  comment   String?
+  createdAt DateTime       @default(now())
+  @@map("feedbacks")
+}
+
+model Store {
+  id           String   @id @default(uuid())
+  name         String
+  ownerName    String
+  category     String   @default("lainnya")
+  status       String   @default("requested")
+  address      String?  @default("")
+  description  String?  @default("")
+  productCount Int      @default(0)
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("stores")
+}
+
 model actions {
   id                  String                @id @default(uuid())
   title               String
   description         String?
   trigger_condition   String                // Misal: "KRITIS_CASH_RUNWAY_LOW"
+  action_type         String?
+  applicable_category String?
   impact_score        Float                 // Kriteria SAW (Benefit)
   urgency_score       Float                 // Kriteria SAW (Benefit)
   ease_score          Float                 // Kriteria SAW (Benefit)
