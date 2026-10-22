@@ -54,8 +54,8 @@ enum VerificationStatus {
 }
 
 enum ProductCategory {
-  MAKANAN
-  MINUMAN
+  KULINER
+  BARANG
   JASA
   LAINNYA
 }
@@ -137,13 +137,14 @@ model Product {
   name        String
   category    ProductCategory @default(LAINNYA)
   price       Float           // Harga jual
+  costPrice   Float?          @default(0) // 👈 Harga modal (HPP) untuk hitung batas aman diskon
   stock       Int             @default(0)
   isActive    Boolean         @default(true)
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
   userId      String
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  saleItems   SaleItem[]      // Produk ini pernah dijual di transaksi mana saja
+  saleItems   SaleItem[]
   @@map("products")
 }
 // SaleItem: detail item per penjualan POS (many-to-many antara Product dan transaksi POS)
@@ -219,9 +220,11 @@ model health_scores {
 
 model actions {
   id                  String                @id @default(uuid())
+  action_type         String?               // Misal: "LOAN_INJECTION", "DEAD_STOCK_DISCOUNT", "PRODUCT_BUNDLING", "IDLE_DAYS_PROMO"
+  applicable_category String?               @default("ALL") // "ALL" | "MAKANAN" | "MINUMAN" | "BARANG" | "JASA"
   title               String
   description         String?
-  trigger_condition   String                // Misal: "KRITIS_CASH_RUNWAY_LOW"
+  trigger_condition   String                // "KRITIS" | "WASPADA" | "SEHAT"
   impact_score        Float                 // Kriteria SAW (Benefit)
   urgency_score       Float                 // Kriteria SAW (Benefit)
   ease_score          Float                 // Kriteria SAW (Benefit)
@@ -230,15 +233,19 @@ model actions {
   action_feedback     action_feedback[]
   @@map("actions")
 }
+
 model recommended_actions {
-  id               String        @id @default(uuid())
-  preference_value Float         // Nilai V hasil perhitungan SAW
-  rank             Int           // Peringkat 1, 2, 3
-  createdAt        DateTime      @default(now())
-  healthScoreId    String
-  healthScore      health_scores @relation(fields: [healthScoreId], references: [id], onDelete: Cascade)
-  actionId         String
-  action           actions       @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  id                   String        @id @default(uuid())
+  preference_value     Float         // Nilai V hasil perhitungan SAW
+  rank                 Int           // Peringkat 1, 2, 3
+  tailored_title       String?       // 👈 Judul dinamis (misal: "Suntikan Kas Rp 3.500.000")
+  tailored_description String?       // 👈 Deskripsi dinamis dengan nama barang & rupiah riil
+  context_data         Json?         // 👈 Data pendukung (JSON)
+  createdAt            DateTime      @default(now())
+  healthScoreId        String
+  healthScore          health_scores @relation(fields: [healthScoreId], references: [id], onDelete: Cascade)
+  actionId             String
+  action               actions       @relation(fields: [actionId], references: [id], onDelete: Cascade)
   @@map("recommended_actions")
 }
 

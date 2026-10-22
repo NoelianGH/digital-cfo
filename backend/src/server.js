@@ -11,6 +11,8 @@ const transactionRoutes = require('./routes/transaction.routes');
 const authRoutes = require('./routes/auth.routes');
 const productRoutes = require('./routes/product.routes')
 const salesRoutes = require('./routes/sales.routes')
+const dssRoutes = require('./routes/dss.routes');
+
 dotenv.config();
 
 const app = express();
@@ -31,7 +33,9 @@ app.use('/api', healthRoutes);
 app.use('/api', transactionRoutes);
 app.use('/api', authRoutes);
 app.use('/api', productRoutes);
-app.use('/api', salesRoutes)
+app.use('/api', salesRoutes);
+app.use('/api', dssRoutes);
+
 app.listen(PORT, () => {
   console.log(`🚀 Server Digital CFO berjalan di: http://localhost:${PORT}`);
   console.log(`📖 Dokumentasi Swagger tersedia di: http://localhost:${PORT}/api-docs`);
