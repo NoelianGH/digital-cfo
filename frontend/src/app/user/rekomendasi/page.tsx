@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -72,8 +72,10 @@ export default function RekomendasiAIPage() {
   const score = Math.round(data?.score ?? 0);
   const category = data?.category ?? "SEHAT";
   const runway = data?.indicators?.cashRunwayBulan ?? data?.indicators?.cash_runway ?? 0;
-  const margin = data?.indicators?.profitMargin ?? data?.indicators?.unit_economics ?? 0;
-  const growth = data?.indicators?.trendGrowth ?? data?.indicators?.trend_analysis ?? 0;
+  const rawMargin = data?.indicators?.profitMargin ?? data?.indicators?.unit_economics ?? 0;
+  const margin = Math.abs(rawMargin) <= 1 && rawMargin !== 0 ? rawMargin * 100 : rawMargin;
+  const rawGrowth = data?.indicators?.trendGrowth ?? data?.indicators?.trend_analysis ?? 0;
+  const growth = Math.abs(rawGrowth) <= 1 && rawGrowth !== 0 ? rawGrowth * 100 : rawGrowth;
 
   return (
     <div className="space-y-6">
