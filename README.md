@@ -227,12 +227,20 @@ Setelah backend berjalan, kunjungi:
 | **Auth** | `/api/auth/register` | `POST` | Pendaftaran akun pengguna / UMKM baru |
 | | `/api/auth/login` | `POST` | Masuk dan memperoleh Bearer JWT token |
 | | `/api/auth/me` | `GET` | Mengambil data profil pengguna yang login |
-| **Health Score** | `/api/healthscore` | `GET` | Kalkulasi Skor Kesehatan Keuangan (Fuzzy Tsukamoto) |
+| **Profil & Toko** | `/api/profile` | `GET` / `PUT` | Profil akun pengguna & data toko UMKM |
+| | `/api/user-stores` | `GET` / `POST` | Pengelolaan data multi-toko pengguna |
+| **Health Score & DSS** | `/api/healthscore` | `GET` | Kalkulasi Skor Kesehatan (Fuzzy Tsukamoto) & Rekomendasi SAW |
 | **Transaksi** | `/api/transactions` | `GET` / `POST` | Daftar riwayat transaksi & input pembukuan baru |
 | | `/api/transactions/:id` | `GET` / `DELETE` | Detail & pembatalan transaksi |
+| **Ekstraksi Struk (OCR)**| `/api/extract` | `POST` | Ekstraksi otomatis data nominal & transaksi dari foto struk |
 | **Produk** | `/api/products` | `GET` / `POST` | Katalog produk & penambahan produk |
 | | `/api/products/:id` | `PUT` / `DELETE` | Pembaruan & penghapusan produk |
+| **Promo** | `/api/promos` | `GET` / `POST` | Manajemen diskon & program promosi toko |
 | **Penjualan (Sales)** | `/api/sales` | `GET` / `POST` | Daftar transaksi kasir & pencatatan penjualan multi-item |
+| **Admin** | `/api/admin/overview` | `GET` | Ringkasan metrik statistik platform |
+| | `/api/admin/stores` | `GET` / `PUT` / `DELETE` | Manajemen dan verifikasi permohonan toko |
+| | `/api/admin/users` | `GET` / `POST` / `PUT` / `DELETE` | Tata kelola akun dan role pengguna |
+| | `/api/admin/feedback` | `GET` | Monitoring ulasan dan kritik-saran pengguna |
 
 ---
 
@@ -254,7 +262,14 @@ Menghasilkan nilai tegas (*crisp value*) skala $0 - 100$ yang diklasifikasikan k
 - 🔴 **KRITIS** (Skor $< 50$): Runway kas tipis, margin negatif, atau terjadi penurunan drastis.
 
 ### 2. Simple Additive Weighting (SAW) — Decision Support System
-Sedang dikembangkan di [`saw.service.js`](backend/src/services/saw.service.js) untuk memberikan rekomendasi prioritas tindakan strategis bagi UMKM (misalnya: penambahan modal, efisiensi biaya bahan baku, atau aktivasi promo penjualan).
+Modul [`saw.service.js`](backend/src/services/saw.service.js) mengimplementasikan metode pembobotan aditif sederhana (*Simple Additive Weighting*) untuk memberikan rekomendasi prioritas tindakan strategis bagi UMKM berdasarkan 4 kriteria terukur:
+1. **Dampak Bisnis (*Impact*)** (Bobot: 35% — *Benefit*): Tingkat pengaruh aksi terhadap peningkatan laba atau penghematan arus kas.
+2. **Tingkat Urgensi (*Urgency*)** (Bobot: 30% — *Benefit*): Kegentingan tindakan untuk segera diimplementasikan guna memitigasi risiko.
+3. **Kemudahan Eksekusi (*Ease*)** (Bobot: 20% — *Benefit*): Kemudahan implementasi tindakan oleh pelaku usaha tanpa hambatan teknis berat.
+4. **Estimasi Biaya (*Cost*)** (Bobot: 15% — *Cost*): Efisiensi modal/dana yang dibutuhkan untuk mengeksekusi aksi ($R_{ij} = \min(X_j) / X_{ij}$).
+
+**Hasil Perankingan & Integrasi**:
+Matriks ternormalisasi dikalikan dengan bobot kriteria untuk mendapatkan nilai preferensi ($V_i = \sum w_j \cdot R_{ij}$). Aksi-aksi strategis dengan nilai preferensi tertinggi disimpan ke database (`recommended_actions`) dan disajikan secara langsung pada halaman rekomendasi pengguna (`/user/rekomendasi`).
 
 ---
 
@@ -276,18 +291,23 @@ Berikut adalah rekapitulasi terstruktur dari seluruh aktivitas riset, perancanga
 | **10** | **21 Oktober 2026** | **AI Financial Health Engine (Fuzzy Tsukamoto)** | • Perancangan algoritma Logika Samar metode Tsukamoto di `fuzzyTsukamoto.service.js`.<br>• Pembuatan fungsi keanggotaan (Linear Naik/Turun, Segitiga) untuk Cash Runway, Unit Economics Margin, dan Tren Penjualan.<br>• Implementasi `healthscore.controller.js` yang menarik data transaksi riil dari PostgreSQL dan menghasilkan skor numerik (0–100) serta status (SEHAT / WASPADA / KRITIS).<br>• Pengujian endpoint `/api/healthscore` dengan otentikasi JWT. | ✅ Selesai |
 | **11** | **21 Oktober 2026** | **Penyempurnaan Panel Admin Toko & Pengguna** | • Implementasi antarmuka lengkap Manajemen Toko (`/admin/stores`): modal CRUD toko, status persetujuan (*Requested, Accepted, Active, Rejected, Suspended*), filter kategori bisnis, dan pencarian.<br>• Implementasi antarmuka lengkap Manajemen Pengguna (`/admin/users`): modal tambah/edit/hapus user, manajemen role (User vs Admin), status keaktifan, dan pencarian. | ✅ Selesai |
 | **12** | **21 Oktober 2026** | **Penyusunan Dokumentasi Komprehensif** | • Pembaruan menyeluruh `README.md` dengan deskripsi teknologi akurat (Express.js, Prisma, PostgreSQL, Fuzzy Tsukamoto).<br>• Penyusunan Logbook Resmi aktivitas pengembangan dari awal hingga kondisi terkini. | ✅ Selesai |
+| **13** | **22 Oktober 2026** | **Integrasi Penuh Frontend-Backend & Fitur Pintar** | • Integrasi menyeluruh klien Next.js dengan REST API Express secara *live* melalui service layer (`api.ts`, `authService.ts`, `transactionService.ts`, `productService.ts`, `promoService.ts`, `adminService.ts`, `userStoreService.ts`).<br>• Implementasi fitur pembaca struk otomatis (*OCR Receipt Scanner*) menggunakan `/api/extract` dan `ocrService.ts`.<br>• Implementasi pencatatan transaksi cepat via suara (*Speech-to-Text*) menggunakan Web Speech API di `speechService.ts`.<br>• Implementasi fitur cetak dan ekspor rekapitulasi riwayat transaksi ke dokumen format PDF melalui `pdfService.ts`.<br>• Pengembangan modul profil toko/pengguna (`profile.controller.js`) dan pengelolaan multi-toko (`userStore.controller.js`). | ✅ Selesai |
+| **14** | **28 Oktober 2026** | **Implementasi & Optimasi Algoritma DSS (SAW)** | • Perancangan dan implementasi algoritma *Simple Additive Weighting* (SAW) di `saw.service.js` dengan matriks normalisasi berbasis 4 kriteria: *Impact* (35%), *Urgency* (30%), *Ease* (20%), dan *Cost* (15%).<br>• Integrasi mesin SAW ke dalam `healthscore.controller.js` untuk merangking aksi rekomendasi secara otomatis berdasarkan kategori kesehatan (SEHAT, WASPADA, KRITIS).<br>• Penyimpanan riwayat indikator finansial (`financial_indicators`), skor kesehatan (`health_scores`), serta daftar rekomendasi terurut (`recommended_actions`) ke database PostgreSQL via Prisma ORM.<br>• Pembaruan dataset seeder pada `seed.js` untuk menyediakan aksi-aksi mitigasi finansial dan strategis yang relevan.<br>• Integrasi tampilan kartu rekomendasi prioritas pada antarmuka frontend `/user/rekomendasi`. | ✅ Selesai |
 
 ---
 
 ## 🗺️ Rencana Pengembangan Selanjutnya (Roadmap)
 
-- [ ] **Integrasi API Penuh Frontend <-> Backend**: Menghubungkan seluruh form Next.js secara live ke endpoint Express.js via HTTP Client/Axios dengan token autentikasi.
-- [ ] **OCR Scanner Faktur/Struk**: Implementasi pembacaan foto bukti transaksi otomatis menggunakan Python Computer Vision / Tesseract / Google Vision API.
-- [ ] **Speech-to-Text Transaksi Suara**: Fitur pencatatan transaksi cepat lewat ucapan suara menggunakan Web Speech API / OpenAI Whisper.
-- [ ] **Finalisasi Algoritma DSS (SAW)**: Penyelesaian skoring alternatif keputusan bisnis di `saw.service.js` untuk rekomendasi langkah strategis UMKM.
-- [ ] **Ekspor Laporan Finansial**: Fitur cetak laporan laba/rugi, arus kas, dan neraca dalam format PDF dan Excel (.xlsx).
+- [x] **Integrasi API Penuh Frontend <-> Backend**: Menghubungkan seluruh form Next.js secara live ke endpoint Express.js via HTTP Client dengan token Bearer JWT.
+- [x] **OCR Scanner Faktur/Struk**: Implementasi pembacaan foto bukti transaksi otomatis dari foto/struk pembayaran (`/api/extract` & `ocrService.ts`).
+- [x] **Speech-to-Text Transaksi Suara**: Fitur pencatatan transaksi cepat lewat ucapan suara menggunakan Web Speech API (`speechService.ts`).
+- [x] **Finalisasi Algoritma DSS (SAW)**: Penyelesaian skoring alternatif keputusan bisnis di `saw.service.js` untuk rekomendasi prioritas langkah strategis UMKM.
+- [x] **Ekspor Laporan Finansial (PDF)**: Fitur cetak ringkasan transaksi dalam format PDF (`pdfService.ts`).
+- [ ] **Ekspor Laporan Format Excel (.xlsx)**: Dukungan pembuatan lembar kerja spreadsheet untuk pembukuan lanjutan.
+- [ ] **Integrasi Payment Gateway**: Dukungan pembayaran digital langsung (Midtrans / Xendit) untuk modul kasir / POS.
 
 ---
 
 ## 👥 Tim Pengembang
 Dikembangkan dengan ❤️ untuk memberdayakan UMKM Indonesia menuju tata kelola finansial yang sehat, transparan, dan berkelanjutan.
+
