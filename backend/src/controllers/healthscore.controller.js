@@ -158,12 +158,17 @@ exports.getHealthScore = async (req, res) => {
     if (allActions.length > 0) {
       const ranked = calculateSAW(allActions);
       for (const r of ranked.slice(0, 3)) {
+        const targetActionId = r.id || r.actionId;
+        const preferenceValue = typeof r.preference_value === 'number' ? r.preference_value : (r.preferenceValue ?? 0);
+
+        if (!targetActionId) continue;
+
         const createdRec = await prisma.recommended_actions.create({
           data: {
-            preference_value: r.preference_value,
+            preference_value: preferenceValue,
             rank: r.rank,
             healthScoreId: savedScore.id,
-            actionId: r.actionId,
+            actionId: targetActionId,
           },
           include: {
             action: true,

@@ -6,23 +6,38 @@ const DEFAULT_WEIGHTS = {
 };
 
 function calculateSAW(actions, weights = DEFAULT_WEIGHTS) {
-  const maxImpact = Math.max(...actions.map(a => a.impact_score));
-  const maxUrgency = Math.max(...actions.map(a => a.urgency_score));
-  const maxEase = Math.max(...actions.map(a => a.ease_score));
-  const minCost = Math.min(...actions.map(a => a.cost_score));
+  if (!actions || actions.length === 0) return [];
+
+  const activeWeights = { ...DEFAULT_WEIGHTS, ...weights };
+
+  const maxImpact = Math.max(...actions.map(a => a.impact_score || 0)) || 1;
+  const maxUrgency = Math.max(...actions.map(a => a.urgency_score || 0)) || 1;
+  const maxEase = Math.max(...actions.map(a => a.ease_score || 0)) || 1;
+  const minCost = Math.min(...actions.map(a => a.cost_score || 1)) || 1;
 
   const scoredActions = actions.map(action => {
-    const rImpact = action.impact_score / maxImpact;
-    const rUrgency = action.urgency_score / maxUrgency;
-    const rEase = action.ease_score / maxEase;
+    const impactScore = action.impact_score || 0;
+    const urgencyScore = action.urgency_score || 0;
+    const easeScore = action.ease_score || 0;
+    const costScore = action.cost_score || 1;
 
-    const rCost = minCost / action.cost_score;
+    const rImpact = impactScore / maxImpact;
+    const rUrgency = urgencyScore / maxUrgency;
+    const rEase = easeScore / maxEase;
+    const rCost = minCost / costScore;
 
-    const preferenceValue = (DEFAULT_WEIGHTS.impact * rImpact) + (DEFAULT_WEIGHTS.urgency * rUrgency) + (DEFAULT_WEIGHTS.ease * rEase) + (DEFAULT_WEIGHTS.cost * rCost);
+    const preferenceValue =
+      (activeWeights.impact * rImpact) +
+      (activeWeights.urgency * rUrgency) +
+      (activeWeights.ease * rEase) +
+      (activeWeights.cost * rCost);
+
+    const prefFloat = parseFloat(preferenceValue.toFixed(4));
 
     return {
       ...action,
-      preferenceValue: parseFloat(preferenceValue.toFixed(4)),
+      preferenceValue: prefFloat,
+      preference_value: prefFloat,
     };
   });
 
@@ -37,4 +52,5 @@ function calculateSAW(actions, weights = DEFAULT_WEIGHTS) {
 }
 
 module.exports = { calculateSAW };
+
 
