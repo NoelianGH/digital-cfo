@@ -2,8 +2,9 @@ const prisma = require('../config/database');
 
 exports.addSales = async (req, res) => {
   try {
-    const { paymentMethod, items } = req.body;
+    const { paymentMethod, items, storeId } = req.body;
     const userId = req.user.userId;
+    const targetStoreId = storeId && storeId !== 'all' ? storeId : null;
 
     if(!items || items.length === 0){
         return res.status(400).json({ success: false, error: 'Items are required' }); 
@@ -65,6 +66,7 @@ exports.addSales = async (req, res) => {
           paymentMethod: paymentMethod || 'TUNAI',
           status: 'VERIFIED',
           userId: userId,
+          storeId: targetStoreId,
         },
       });
       // B. Buat data Struk Penjualan & detail itemnya
@@ -73,6 +75,8 @@ exports.addSales = async (req, res) => {
           total: totalAmount,
           paymentMethod: paymentMethod || 'TUNAI',
           receiptCode: receiptCode,
+          userId: userId,
+          storeId: targetStoreId,
           transactionId: cashTransaction.id, // Terhubung ke kas di atas
           items: {
             create: itemsDetailInDb, // Detail barang-barang yang dibeli

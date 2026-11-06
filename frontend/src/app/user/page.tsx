@@ -15,9 +15,10 @@ import {
   CheckCircle, 
   Loader2 
 } from "lucide-react";
-import { transactionService, TransactionSummary } from "@/services/transactionService";
+import { transactionService, TransactionSummary, TransactionItem } from "@/services/transactionService";
 import { healthScoreService, HealthScoreData } from "@/services/healthScoreService";
 import { authService, UserProfile } from "@/services/authService";
+import CashFlowChart from "@/components/CashFlowChart";
 
 export default function UserHomePage() {
   const [summary, setSummary] = useState<TransactionSummary>({
@@ -27,6 +28,7 @@ export default function UserHomePage() {
     netCashFlow: 0,
     count: 0,
   });
+  const [transactions, setTransactions] = useState<TransactionItem[]>([]);
   const [healthScore, setHealthScore] = useState<HealthScoreData | null>(null);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,9 +43,10 @@ export default function UserHomePage() {
       const u = authService.getStoredUser();
       if (u) setUser(u);
 
-      const [sumRes, healthRes] = await Promise.all([
+      const [sumRes, healthRes, txRes] = await Promise.all([
         transactionService.getSummary(),
         healthScoreService.getHealthScore(),
+        transactionService.getTransactions(),
       ]);
 
       if (sumRes.success && sumRes.data) {
@@ -51,6 +54,9 @@ export default function UserHomePage() {
       }
       if (healthRes.success && healthRes.data) {
         setHealthScore(healthRes.data);
+      }
+      if (txRes.success && txRes.data) {
+        setTransactions(txRes.data);
       }
     } catch (e) {
       console.warn("Dashboard loaded fallback:", e);
@@ -202,25 +208,19 @@ export default function UserHomePage() {
         </div>
       </div>
 
-      {/* Visual Chart / Ledger Summary */}
+      {/* Visual Chart / Cash Flow Activity */}
       <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="font-bold text-gray-900 text-base">Aktivitas Arus Kas Terkini</h3>
-            <p className="text-xs text-gray-400">Total {summary.count || 0} riwayat transaksi tercatat</p>
+            <p className="text-xs text-gray-400">Grafik pergerakan pemasukan dan pengeluaran kas real-time</p>
           </div>
-          <Link href="/user/riwayat" className="text-xs font-semibold text-blue-600 hover:underline">
-            Lihat Riwayat Lengkap →
+          <Link href="/user/pembukuan" className="text-xs font-semibold text-blue-600 hover:underline">
+            Lihat Lengkap →
           </Link>
         </div>
 
-        <div className="p-6 bg-slate-50 rounded-xl border border-slate-200 flex flex-col items-center justify-center text-center">
-          <TrendingUp className="w-10 h-10 text-blue-500 mb-2" />
-          <h4 className="font-bold text-sm text-slate-800">Pembukuan Keuangan Tersinkronisasi</h4>
-          <p className="text-xs text-slate-500 max-w-md mt-1">
-            Data pembukuan terhubung ke database. Gunakan fitur OCR Scan, Suara, atau PDF to Data untuk mencatat arus kas secara real-time.
-          </p>
-        </div>
+        <CashFlowChart transactions={transactions} loading={loading} />
       </div>
     </div>
   );

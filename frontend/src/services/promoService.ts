@@ -17,9 +17,10 @@ export interface PromoItem {
 }
 
 export const promoService = {
-  // 1. Get all promos
-  async getPromos(): Promise<{ success: boolean; data?: PromoItem[]; error?: string }> {
-    return apiRequest<PromoItem[]>('/promos', { method: 'GET' });
+  // 1. Get all promos (supports storeId filter)
+  async getPromos(storeId?: string): Promise<{ success: boolean; data?: PromoItem[]; error?: string }> {
+    const query = storeId && storeId !== 'all' ? `?storeId=${encodeURIComponent(storeId)}` : '';
+    return apiRequest<PromoItem[]>(`/promos${query}`, { method: 'GET' });
   },
 
   // 2. Get promo by ID
@@ -37,6 +38,7 @@ export const promoService = {
     startDate?: string;
     endDate?: string;
     status?: string;
+    storeId?: string;
   }): Promise<{ success: boolean; data?: PromoItem; error?: string }> {
     return apiRequest<PromoItem>('/promos', {
       method: 'POST',

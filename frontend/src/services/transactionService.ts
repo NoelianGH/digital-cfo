@@ -44,9 +44,10 @@ export interface TransactionSummary {
 }
 
 export const transactionService = {
-  // 1. Get all transactions
-  async getTransactions(): Promise<{ success: boolean; data?: TransactionItem[]; error?: string }> {
-    return apiRequest<TransactionItem[]>('/transactions', { method: 'GET' });
+  // 1. Get all transactions (supports storeId filter)
+  async getTransactions(storeId?: string): Promise<{ success: boolean; data?: TransactionItem[]; error?: string }> {
+    const query = storeId && storeId !== 'all' ? `?storeId=${encodeURIComponent(storeId)}` : '';
+    return apiRequest<TransactionItem[]>(`/transactions${query}`, { method: 'GET' });
   },
 
   // 2. Add single transaction
@@ -58,6 +59,7 @@ export const transactionService = {
     category?: string;
     source?: 'MANUAL' | 'OCR' | 'VOICE' | 'POS';
     paymentMethod?: string;
+    storeId?: string;
   }): Promise<{ success: boolean; data?: TransactionItem; error?: string }> {
     return apiRequest<TransactionItem>('/transactions', {
       method: 'POST',

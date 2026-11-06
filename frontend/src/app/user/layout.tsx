@@ -63,7 +63,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
     { href: "/user/riwayat", label: "Riwayat Transaksi", icon: History },
     { href: "/user/product", label: "Product & POS", icon: Package },
     { href: "/user/promo", label: "Promo & Diskon", icon: Tag },
-    { href: "/user/rekomendasi", label: "Rekomendasi AI", icon: Lightbulb },
+    { href: "/user/rekomendasi", label: "Rekomendasi", icon: Lightbulb },
   ];
 
   const initials = (user?.name || "U")

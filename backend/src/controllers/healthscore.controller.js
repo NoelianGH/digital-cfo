@@ -6,10 +6,16 @@ exports.getHealthScore = async (req, res) => {
   try {
     const userId = req.user.userId;
     const period = String(req.query.period || '1m').toLowerCase();
+    const { storeId } = req.query;
 
-    // 1. Ambil semua transaksi milik user ini
+    const whereClause = { userId };
+    if (storeId && storeId !== 'all' && storeId !== 'undefined' && storeId !== 'null') {
+      whereClause.storeId = storeId;
+    }
+
+    // 1. Ambil transaksi milik user (dan cabang yang dipilih jika ada)
     const transactions = await prisma.transaction.findMany({
-      where: { userId },
+      where: whereClause,
       orderBy: { date: 'asc' },
     });
 
@@ -138,25 +144,22 @@ exports.getHealthScore = async (req, res) => {
       },
     });
 
-    // 6. Ambil Tindakan Rekomendasi & Ranking SAW
+    // 6. Ambil Tindakan Rekomendasi Sesuai Status Diagnosis Fuzzy (KRITIS / WASPADA / SEHAT) & Ranking SAW
     let allActions = await prisma.actions.findMany({
       where: {
-        OR: [
-          { applicable_category: fuzzyResult.category },
-          { applicable_category: 'ALL' },
-          { applicable_category: null },
-        ],
+        trigger_condition: fuzzyResult.category,
       },
-      take: 6,
     });
 
+    // Fallback jika tidak ada aksi dengan trigger_condition tersebut
     if (allActions.length === 0) {
       allActions = await prisma.actions.findMany({ take: 6 });
     }
 
     const recommendedActionsData = [];
     if (allActions.length > 0) {
-      const ranked = calculateSAW(allActions);
+      // Hitung skor SAW secara dinamis berdasarkan indikator riil pengguna
+      const ranked = calculateSAW(allActions, fuzzyResult.indicators);
       for (const r of ranked.slice(0, 3)) {
         const targetActionId = r.id || r.actionId;
         const preferenceValue = typeof r.preference_value === 'number' ? r.preference_value : (r.preferenceValue ?? 0);

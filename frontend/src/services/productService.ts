@@ -13,9 +13,10 @@ export interface ProductItem {
 }
 
 export const productService = {
-  // 1. Get products
-  async getProducts(): Promise<{ success: boolean; data?: ProductItem[]; error?: string }> {
-    return apiRequest<ProductItem[]>('/products', { method: 'GET' });
+  // 1. Get products (supports storeId filter)
+  async getProducts(storeId?: string): Promise<{ success: boolean; data?: ProductItem[]; error?: string }> {
+    const query = storeId && storeId !== 'all' ? `?storeId=${encodeURIComponent(storeId)}` : '';
+    return apiRequest<ProductItem[]>(`/products${query}`, { method: 'GET' });
   },
 
   // 2. Get product by ID
@@ -29,6 +30,7 @@ export const productService = {
     price: number;
     category?: string;
     stock?: number;
+    storeId?: string;
   }): Promise<{ success: boolean; data?: ProductItem; error?: string }> {
     return apiRequest<ProductItem>('/products', {
       method: 'POST',
@@ -45,6 +47,7 @@ export const productService = {
       category?: string;
       stock?: number;
       isActive?: boolean;
+      storeId?: string;
     }
   ): Promise<{ success: boolean; data?: ProductItem; error?: string }> {
     return apiRequest<ProductItem>(`/products/${id}`, {
@@ -64,6 +67,7 @@ export const productService = {
   async checkoutSale(payload: {
     paymentMethod: string;
     items: Array<{ productId: string; qty: number }>;
+    storeId?: string;
   }): Promise<{ success: boolean; data?: any; message?: string; error?: string }> {
     return apiRequest('/sales', {
       method: 'POST',

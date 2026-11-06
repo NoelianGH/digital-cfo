@@ -18,9 +18,24 @@ function normalizePromoStatus(st) {
 // 1. Get all promos for current user
 exports.getPromos = async (req, res) => {
   try {
+    const { storeId } = req.query;
+    const whereClause = { userId: req.user.userId };
+
+    if (storeId && storeId !== 'all' && storeId !== 'undefined' && storeId !== 'null') {
+      whereClause.OR = [
+        { storeId: storeId },
+        { storeId: null }, // Promo umum berlaku di semua cabang
+      ];
+    }
+
     const promos = await prisma.promo.findMany({
-      where: { userId: req.user.userId },
+      where: whereClause,
       orderBy: { createdAt: 'desc' },
+      include: {
+        store: {
+          select: { id: true, name: true }
+        }
+      }
     });
     return res.status(200).json({ success: true, data: promos });
   } catch (error) {
@@ -49,7 +64,7 @@ exports.getPromoById = async (req, res) => {
 // 3. Add new promo
 exports.addPromo = async (req, res) => {
   try {
-    const { title, description, type, value, minPurchase, startDate, endDate, status } = req.body;
+    const { title, description, type, value, minPurchase, startDate, endDate, status, storeId } = req.body;
 
     if (!title || value === undefined) {
       return res.status(400).json({ success: false, error: 'Judul promo dan nilai diskon wajib diisi' });
@@ -69,6 +84,7 @@ exports.addPromo = async (req, res) => {
         endDate: end,
         status: normalizePromoStatus(status),
         userId: req.user.userId,
+        storeId: storeId && storeId !== 'all' ? storeId : null,
       },
     });
 

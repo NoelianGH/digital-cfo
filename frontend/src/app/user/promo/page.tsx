@@ -3,8 +3,22 @@
 import { useState, useEffect } from "react";
 import { Plus, X, Tag, Edit3, Trash2, CheckCircle, AlertCircle, Loader2, Calendar, Percent, Gift } from "lucide-react";
 import { promoService, PromoItem } from "@/services/promoService";
+import StoreSelectorGate from "@/components/StoreSelectorGate";
 
 export default function PromoPage() {
+  return (
+    <StoreSelectorGate
+      pageTitle="Promo & Diskon"
+      pageSubtitle="Kelola program promosi, potongan harga, dan voucher belanja per cabang usaha"
+      pageIcon={Tag}
+      pageKey="promo"
+    >
+      {(activeStore) => <PromoContent activeStore={activeStore} />}
+    </StoreSelectorGate>
+  );
+}
+
+function PromoContent({ activeStore }: { activeStore: any }) {
   const [promos, setPromos] = useState<PromoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -25,12 +39,13 @@ export default function PromoPage() {
 
   useEffect(() => {
     fetchPromos();
-  }, []);
+  }, [activeStore.id, activeStore.isAll]);
 
   const fetchPromos = async () => {
     setLoading(true);
     try {
-      const res = await promoService.getPromos();
+      const storeParam = activeStore.isAll ? undefined : activeStore.id;
+      const res = await promoService.getPromos(storeParam);
       if (res.success && res.data) {
         setPromos(res.data);
       } else {
@@ -59,6 +74,7 @@ export default function PromoPage() {
         startDate: new Date().toISOString().split("T")[0],
         endDate,
         status: "AKTIF",
+        storeId: activeStore.isAll ? undefined : activeStore.id,
       });
 
       if (res.success && res.data) {
@@ -140,11 +156,15 @@ export default function PromoPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Manajemen Promo & Diskon</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Kelola diskon, cashback, dan program loyalitas pelanggan.</p>
-        </div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Manajemen Promo & Diskon {activeStore.isAll ? "(Semua Cabang)" : `— ${activeStore.name}`}
+              </h1>
+              <p className="text-gray-500 text-sm mt-0.5">
+                Kelola potongan harga, cashback, dan program diskon belanja pelanggan untuk toko ini.
+              </p>
+            </div>
         <button
           onClick={() => setIsAddModalOpen(true)}
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-sm self-start sm:self-auto"

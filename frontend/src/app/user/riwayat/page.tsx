@@ -18,9 +18,12 @@ import {
   ShoppingBag,
   Receipt,
   Copy,
-  Check
+  Check,
+  History,
+  Store as StoreIcon
 } from "lucide-react";
 import { transactionService, TransactionItem, SaleDetail } from "@/services/transactionService";
+import StoreSelectorGate from "@/components/StoreSelectorGate";
 
 interface TransactionDisplay {
   id: string;
@@ -37,6 +40,19 @@ interface TransactionDisplay {
 const initialTransactions: TransactionDisplay[] = [];
 
 export default function RiwayatTransaksiPage() {
+  return (
+    <StoreSelectorGate
+      pageTitle="Riwayat Transaksi"
+      pageSubtitle="Pantau seluruh arus kas, mutasi rekening, dan struk belanja per cabang"
+      pageIcon={History}
+      pageKey="riwayat"
+    >
+      {(activeStore) => <RiwayatContent activeStore={activeStore} />}
+    </StoreSelectorGate>
+  );
+}
+
+function RiwayatContent({ activeStore }: { activeStore: any }) {
   const [transactions, setTransactions] = useState<TransactionDisplay[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -47,12 +63,13 @@ export default function RiwayatTransaksiPage() {
 
   useEffect(() => {
     fetchTransactions();
-  }, []);
+  }, [activeStore.id, activeStore.isAll]);
 
   const fetchTransactions = async () => {
     setLoading(true);
     try {
-      const res = await transactionService.getTransactions();
+      const storeParam = activeStore.isAll ? undefined : activeStore.id;
+      const res = await transactionService.getTransactions(storeParam);
       if (res.success && res.data && res.data.length > 0) {
         const mapped: TransactionDisplay[] = res.data.map((t) => {
           const isIncome = t.type === "MASUK" || t.type === "MODAL";
@@ -173,13 +190,15 @@ export default function RiwayatTransaksiPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">Riwayat Transaksi</h1>
-          <p className="text-gray-500 text-sm">
-            Arsip lengkap seluruh transaksi keluar & masuk dari sistem POS kasir, input manual, OCR, dan berkas PDF.
-          </p>
-        </div>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                Riwayat Transaksi {activeStore.isAll ? "(Semua Cabang)" : `— ${activeStore.name}`}
+              </h1>
+              <p className="text-gray-500 text-sm">
+                Arsip transaksi keluar & masuk dari sistem POS kasir, input manual, OCR, dan berkas PDF untuk toko ini.
+              </p>
+            </div>
         <div className="flex items-center gap-2">
           <button
             onClick={fetchTransactions}

@@ -12,9 +12,24 @@ function normalizeCategory(cat) {
 // 1. Get all products for user
 exports.getProducts = async (req, res) => {
   try {
+    const { storeId } = req.query;
+    const whereClause = { userId: req.user.userId, isActive: true };
+
+    if (storeId && storeId !== 'all' && storeId !== 'undefined' && storeId !== 'null') {
+      whereClause.OR = [
+        { storeId: storeId },
+        { storeId: null }, // Produk universal juga tetap muncul jika ada
+      ];
+    }
+
     const products = await prisma.product.findMany({
-      where: { userId: req.user.userId, isActive: true },
+      where: whereClause,
       orderBy: { createdAt: 'desc' },
+      include: {
+        store: {
+          select: { id: true, name: true }
+        }
+      }
     });
     return res.status(200).json({ success: true, data: products });
   } catch (error) {
@@ -43,7 +58,7 @@ exports.getProductById = async (req, res) => {
 // 3. Add new product
 exports.addProduct = async (req, res) => {
   try {
-    const { name, price, category, stock } = req.body;
+    const { name, price, category, stock, storeId } = req.body;
 
     if (!name || price === undefined) {
       return res.status(400).json({ success: false, error: 'Nama dan harga produk wajib diisi' });
@@ -56,6 +71,7 @@ exports.addProduct = async (req, res) => {
         price: parseFloat(price) || 0,
         stock: parseInt(stock, 10) || 0,
         userId: req.user.userId,
+        storeId: storeId && storeId !== 'all' ? storeId : null,
         isActive: true,
       },
     });
@@ -71,7 +87,7 @@ exports.addProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, category, price, stock, isActive } = req.body;
+    const { name, category, price, stock, isActive, storeId } = req.body;
 
     const existing = await prisma.product.findFirst({
       where: { id, userId: req.user.userId },
@@ -87,6 +103,7 @@ exports.updateProduct = async (req, res) => {
     if (price !== undefined) updateData.price = parseFloat(price);
     if (stock !== undefined) updateData.stock = parseInt(stock, 10);
     if (isActive !== undefined) updateData.isActive = Boolean(isActive);
+    if (storeId !== undefined) updateData.storeId = storeId && storeId !== 'all' ? storeId : null;
 
     const updatedProduct = await prisma.product.update({
       where: { id },

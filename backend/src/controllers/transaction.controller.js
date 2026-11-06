@@ -40,9 +40,21 @@ function normalizePaymentMethod(pm) {
 // 1. Ambil semua transaksi beserta detail item penjualan (jika dari kasir POS)
 exports.getTransactions = async (req, res) => {
   try {
+    const { storeId } = req.query;
+    const whereClause = { userId: req.user.userId };
+
+    if (storeId && storeId !== 'all' && storeId !== 'undefined' && storeId !== 'null') {
+      whereClause.storeId = storeId;
+    }
+
     const transactions = await prisma.transaction.findMany({
-      where: { userId: req.user.userId },
+      where: whereClause,
       orderBy: { date: 'desc' },
+      include: {
+        store: {
+          select: { id: true, name: true, category: true }
+        }
+      }
     });
 
     const txIds = transactions.map((t) => t.id);
@@ -107,7 +119,7 @@ exports.getTransactions = async (req, res) => {
 // 2. Tambahkan transaksi baru
 exports.addTransaction = async (req, res) => {
   try {
-    const { date, description, amount, type, category, source, paymentMethod } = req.body;
+    const { date, description, amount, type, category, source, paymentMethod, storeId } = req.body;
 
     if (!description || amount === undefined || isNaN(parseFloat(amount))) {
       return res.status(400).json({ success: false, error: 'Keterangan dan nominal transaksi valid harus diisi' });
@@ -129,6 +141,7 @@ exports.addTransaction = async (req, res) => {
         paymentMethod: finalPayment,
         status: 'VERIFIED',
         userId: req.user.userId,
+        storeId: storeId && storeId !== 'all' ? storeId : null,
       },
     });
 
@@ -142,7 +155,7 @@ exports.addTransaction = async (req, res) => {
 // 3. Batch import transaksi (dari PDF mutasi atau OCR multiple)
 exports.batchAddTransactions = async (req, res) => {
   try {
-    const { transactions } = req.body;
+    const { transactions, storeId } = req.body;
     if (!Array.isArray(transactions) || transactions.length === 0) {
       return res.status(400).json({ success: false, error: 'Daftar transaksi tidak boleh kosong' });
     }
@@ -154,6 +167,7 @@ exports.batchAddTransactions = async (req, res) => {
       const finalCategory = normalizeCategory(item.category, finalType);
       const finalSource = normalizeSource(item.source || 'MANUAL');
       const finalPayment = normalizePaymentMethod(item.paymentMethod);
+      const targetStoreId = item.storeId || storeId || null;
 
       const record = await prisma.transaction.create({
         data: {
@@ -166,6 +180,7 @@ exports.batchAddTransactions = async (req, res) => {
           paymentMethod: finalPayment,
           status: 'VERIFIED',
           userId: req.user.userId,
+          storeId: targetStoreId && targetStoreId !== 'all' ? targetStoreId : null,
         },
       });
       createdRecords.push(record);

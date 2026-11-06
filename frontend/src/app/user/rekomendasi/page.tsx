@@ -23,10 +23,24 @@ import {
   PERIOD_MIN_TRANSACTIONS,
   PERIOD_LABELS,
 } from "@/services/healthScoreService";
+import StoreSelectorGate from "@/components/StoreSelectorGate";
 
 const PERIODS: AnalysisPeriod[] = ["1m", "3m", "6m", "1y"];
 
 export default function RekomendasiAIPage() {
+  return (
+    <StoreSelectorGate
+      pageTitle="Rekomendasi"
+      pageSubtitle="Diagnosis kesehatan finansial dan rekomendasi aksi bisnis cerdas khusus untuk cabang toko ini"
+      pageIcon={Lightbulb}
+      pageKey="rekomendasi"
+    >
+      {(activeStore) => <RekomendasiContent activeStore={activeStore} />}
+    </StoreSelectorGate>
+  );
+}
+
+function RekomendasiContent({ activeStore }: { activeStore: any }) {
   const [period, setPeriod] = useState<AnalysisPeriod>("1m");
   const [data, setData] = useState<HealthScoreData | null>(null);
   const [txCount, setTxCount] = useState<number | null>(null);
@@ -42,11 +56,12 @@ export default function RekomendasiAIPage() {
       else setLoading(true);
 
       try {
-        const count = await healthScoreService.getTransactionCountForPeriod(period);
+        const storeParam = activeStore.isAll ? undefined : activeStore.id;
+        const count = await healthScoreService.getTransactionCountForPeriod(period, storeParam);
         setTxCount(count);
 
         if (count >= PERIOD_MIN_TRANSACTIONS[period]) {
-          const res = await healthScoreService.getHealthScore(period);
+          const res = await healthScoreService.getHealthScore(period, storeParam);
           if (res.success && res.data) {
             setData(res.data);
           } else {
@@ -60,7 +75,7 @@ export default function RekomendasiAIPage() {
         setRecalculating(false);
       }
     },
-    [period]
+    [period, activeStore.id, activeStore.isAll]
   );
 
   useEffect(() => {
@@ -80,15 +95,17 @@ export default function RekomendasiAIPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-gray-900">Rekomendasi</h1>
-          </div>
-          <p className="text-gray-500 text-sm mt-0.5">
-            Evaluasi kesehatan finansial cerdas berdasarkan riwayat pembukuan Anda.
-          </p>
-        </div>
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Rekomendasi {activeStore.isAll ? "(Semua Cabang)" : `— ${activeStore.name}`}
+                </h1>
+              </div>
+              <p className="text-gray-500 text-sm mt-0.5">
+                Evaluasi kesehatan finansial cerdas berdasarkan riwayat pembukuan toko ini.
+              </p>
+            </div>
 
         <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
           {/* Period Selector */}

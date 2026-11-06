@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, X, ShoppingCart, Printer, CheckCircle, Loader2, AlertCircle, Edit3, Trash2, Save } from "lucide-react";
+import { Plus, X, ShoppingCart, Printer, CheckCircle, Loader2, AlertCircle, Edit3, Trash2, Save, Package } from "lucide-react";
 import { productService, ProductItem } from "@/services/productService";
+import StoreSelectorGate from "@/components/StoreSelectorGate";
 
 const initialSampleProducts: ProductItem[] = [];
 
@@ -14,7 +15,20 @@ interface CartItem {
 }
 
 export default function ProductPage() {
-  const [products, setProducts] = useState<ProductItem[]>(initialSampleProducts);
+  return (
+    <StoreSelectorGate
+      pageTitle="Produk & POS Kasir"
+      pageSubtitle="Kelola katalog produk, stok barang, dan transaksi kasir untuk cabang ini"
+      pageIcon={Package}
+      pageKey="product"
+    >
+      {(activeStore) => <ProductContent activeStore={activeStore} />}
+    </StoreSelectorGate>
+  );
+}
+
+function ProductContent({ activeStore }: { activeStore: any }) {
+  const [products, setProducts] = useState<ProductItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -39,12 +53,13 @@ export default function ProductPage() {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [activeStore.id, activeStore.isAll]);
 
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await productService.getProducts();
+      const storeParam = activeStore.isAll ? undefined : activeStore.id;
+      const res = await productService.getProducts(storeParam);
       if (res.success && res.data && res.data.length > 0) {
         setProducts(res.data);
       } else {
@@ -69,6 +84,7 @@ export default function ProductPage() {
         category: newProdCategory,
         price: parseFloat(newProdPrice),
         stock: parseInt(newProdStock) || 0,
+        storeId: activeStore.isAll ? undefined : activeStore.id,
       });
 
       if (res.success && res.data) {
@@ -162,6 +178,7 @@ export default function ProductPage() {
           productId: c.productId,
           qty: c.qty,
         })),
+        storeId: activeStore.isAll ? undefined : activeStore.id,
       });
 
       if (res.success && res.data) {
@@ -190,10 +207,14 @@ export default function ProductPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Manajemen Produk & POS Kasir</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Kelola katalog barang jualan Anda dan kasir transaksi penjualan.</p>
-        </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Manajemen Produk & POS Kasir {activeStore.isAll ? "(Semua Cabang)" : `— ${activeStore.name}`}
+              </h1>
+              <p className="text-gray-500 text-sm mt-0.5">
+                Kelola katalog jualan dan transaksi kasir langsung untuk toko ini.
+              </p>
+            </div>
         <div className="flex gap-2">
           <button
             onClick={() => setIsSaleModalOpen(true)}
@@ -621,7 +642,11 @@ export default function ProductPage() {
 
                   <div className="max-w-sm mx-auto border border-gray-200 rounded-2xl p-5 bg-gray-50 font-mono text-xs shadow-sm">
                     <div className="text-center mb-3">
-                      <p className="text-[11px] font-bold text-blue-600">KODE STRUK: {receiptNumber}</p>
+                      <p className="font-bold text-gray-900 text-sm">{activeStore.name}</p>
+                      {activeStore.address && (
+                        <p className="text-[10px] text-gray-500 font-sans">{activeStore.address}</p>
+                      )}
+                      <p className="text-[11px] font-bold text-blue-600 mt-1">KODE STRUK: {receiptNumber}</p>
                       <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-bold mt-1 inline-block">
                         ✓ LUNAS ({paymentMethod})
                       </span>

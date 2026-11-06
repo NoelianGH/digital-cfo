@@ -45,17 +45,18 @@ export const PERIOD_LABELS: Record<AnalysisPeriod, string> = {
 };
 
 export const healthScoreService = {
-  async getHealthScore(period: AnalysisPeriod = '1m'): Promise<{
+  async getHealthScore(period: AnalysisPeriod = '1m', storeId?: string): Promise<{
     success: boolean;
     message?: string;
     data?: HealthScoreData;
     error?: string;
   }> {
-    return apiRequest<HealthScoreData>(`/health-score?period=${period}`, { method: 'GET' });
+    const storeParam = storeId && storeId !== 'all' ? `&storeId=${encodeURIComponent(storeId)}` : '';
+    return apiRequest<HealthScoreData>(`/health-score?period=${period}${storeParam}`, { method: 'GET' });
   },
 
   /** Fetch transactions filtered to a date window and return the count */
-  async getTransactionCountForPeriod(period: AnalysisPeriod): Promise<number> {
+  async getTransactionCountForPeriod(period: AnalysisPeriod, storeId?: string): Promise<number> {
     const now = new Date();
     const from = new Date(now);
     if (period === '1m') from.setMonth(now.getMonth() - 1);
@@ -64,7 +65,8 @@ export const healthScoreService = {
     else from.setFullYear(now.getFullYear() - 1);
 
     try {
-      const res = await apiRequest<any[]>('/transactions', { method: 'GET' });
+      const storeParam = storeId && storeId !== 'all' ? `?storeId=${encodeURIComponent(storeId)}` : '';
+      const res = await apiRequest<any[]>(`/transactions${storeParam}`, { method: 'GET' });
       if (!res.success || !res.data) return 0;
       const fromTime = from.getTime();
       return res.data.filter((t: any) => {

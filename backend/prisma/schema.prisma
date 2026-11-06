@@ -118,6 +118,7 @@ model User {
   alerts              alerts[]
   feedbacks           Feedback[]
   stores              Store[]
+  sales               Sale[]
   @@map("users")
 }
 model Transaction {
@@ -132,6 +133,9 @@ model Transaction {
   status        VerificationStatus  @default(DRAFT)
   userId        String
   user          User                @relation(fields: [userId], references: [id])
+  storeId       String?
+  store         Store?              @relation(fields: [storeId], references: [id], onDelete: SetNull)
+  sale          Sale?
   createdAt     DateTime            @default(now())
   @@map("transactions")
 }
@@ -147,6 +151,8 @@ model Product {
   updatedAt   DateTime        @updatedAt
   userId      String
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  storeId     String?
+  store       Store?          @relation(fields: [storeId], references: [id], onDelete: SetNull)
   saleItems   SaleItem[]      // Produk ini pernah dijual di transaksi mana saja
   @@map("products")
 }
@@ -169,8 +175,16 @@ model Sale {
   paymentMethod PaymentMethod @default(TUNAI)
   receiptCode   String        @unique // Kode struk unik, misal: TRX-20261021-0001
   createdAt     DateTime      @default(now())
-  // Relasi ke transaksi keuangan (otomatis masuk pembukuan kas)
+  
+  // Relasi ke User & Store
+  userId        String?
+  user          User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  storeId       String?
+  store         Store?        @relation(fields: [storeId], references: [id], onDelete: SetNull)
+
+  // Relasi formal ke transaksi keuangan
   transactionId String?       @unique
+  transaction   Transaction?  @relation(fields: [transactionId], references: [id], onDelete: SetNull)
   
   // Detail item yang dijual
   items         SaleItem[]
@@ -191,6 +205,8 @@ model Promo {
   updatedAt   DateTime    @updatedAt
   userId      String
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  storeId     String?
+  store       Store?      @relation(fields: [storeId], references: [id], onDelete: SetNull)
   @@map("promos")
 }
 
@@ -245,6 +261,11 @@ model Store {
   user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  transactions Transaction[]
+  products     Product[]
+  sales        Sale[]
+  promos       Promo[]
 
   @@map("stores")
 }
