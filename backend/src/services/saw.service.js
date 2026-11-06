@@ -1,8 +1,8 @@
 const DEFAULT_WEIGHTS = {
-  impact: 0.35,
+  impact: 0.40,
   urgency: 0.30,
   ease: 0.20,
-  cost: 0.15,
+  cost: 0.10,
 };
 
 function calculateSAW(actions, weights = DEFAULT_WEIGHTS) {

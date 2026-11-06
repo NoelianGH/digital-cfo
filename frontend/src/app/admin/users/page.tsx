@@ -236,9 +236,9 @@ export default function AdminUsersPage() {
             <span className="text-gray-500 text-sm">Memuat data pengguna...</span>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overflow-y-auto max-h-[520px] rounded-b-xl border-t border-gray-100">
             <table className="w-full text-sm">
-              <thead>
+              <thead className="sticky top-0 z-10 shadow-xs">
                 <tr className="border-b border-gray-100 bg-gray-50 text-gray-500 text-left">
                   <th className="px-4 py-3 font-medium">Pengguna</th>
                   <th className="px-4 py-3 font-medium">Email</th>

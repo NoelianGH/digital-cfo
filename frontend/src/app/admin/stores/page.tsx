@@ -339,7 +339,7 @@ export default function AdminStoresPage() {
           </span>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-auto max-h-[520px] rounded-b-xl border-t border-gray-100">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16 text-gray-500">
               <Loader2 className="w-7 h-7 text-blue-600 animate-spin mb-3" />
@@ -347,7 +347,7 @@ export default function AdminStoresPage() {
             </div>
           ) : (
             <table className="w-full text-sm">
-              <thead>
+              <thead className="sticky top-0 z-10 shadow-xs">
                 <tr className="border-b border-gray-100 bg-gray-50 text-gray-500 text-left">
                   <th className="px-4 py-3 font-medium">Toko</th>
                   <th className="px-4 py-3 font-medium">Pemilik</th>

@@ -37,14 +37,67 @@ function normalizePaymentMethod(pm) {
   return 'LAINNYA';
 }
 
-// 1. Ambil semua transaksi
+// 1. Ambil semua transaksi beserta detail item penjualan (jika dari kasir POS)
 exports.getTransactions = async (req, res) => {
   try {
     const transactions = await prisma.transaction.findMany({
       where: { userId: req.user.userId },
       orderBy: { date: 'desc' },
     });
-    return res.status(200).json({ success: true, data: transactions });
+
+    const txIds = transactions.map((t) => t.id);
+    const sales = await prisma.sale.findMany({
+      where: { transactionId: { in: txIds } },
+      include: {
+        items: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                category: true,
+                price: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const saleMap = new Map();
+    sales.forEach((s) => saleMap.set(s.transactionId, s));
+
+    const enriched = transactions.map((t) => {
+      const sale = saleMap.get(t.id);
+      if (!sale) return { ...t, sale: null };
+
+      const items = (sale.items || []).map((it) => ({
+        id: it.id,
+        productId: it.productId,
+        productName: it.product?.name || 'Produk',
+        productCategory: it.product?.category || 'LAINNYA',
+        qty: it.qty,
+        priceAtSale: it.priceAtSale,
+        subtotal: it.subtotal,
+      }));
+
+      // Pastikan total struk selalu sinkron presisi 100% dengan rincian item
+      const calculatedTotal = items.reduce((sum, it) => sum + it.subtotal, 0);
+
+      return {
+        ...t,
+        sale: {
+          id: sale.id,
+          receiptCode: sale.receiptCode,
+          total: calculatedTotal > 0 ? calculatedTotal : sale.total,
+          paymentMethod: sale.paymentMethod,
+          createdAt: sale.createdAt,
+          items,
+        },
+      };
+    });
+
+    return res.status(200).json({ success: true, data: enriched });
   } catch (error) {
     console.error('Error fetching transactions:', error);
     res.status(500).json({ success: false, error: 'Internal Server Error' });

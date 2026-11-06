@@ -240,9 +240,9 @@ export default function ProductPage() {
             <span className="text-xs">Memuat katalog produk...</span>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overflow-y-auto max-h-[520px] rounded-b-xl border-t border-gray-100">
             <table className="w-full text-left">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10 shadow-xs">
                 <tr>
                   <th className="px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase">ID</th>
                   <th className="px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase">Nama Produk</th>

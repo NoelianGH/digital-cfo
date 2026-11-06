@@ -59,8 +59,8 @@ export default function UserHomePage() {
     }
   };
 
-  const scoreVal = healthScore?.score ?? 78;
-  const scoreCategory = healthScore?.category ?? "SEHAT";
+  const scoreVal = healthScore?.score ?? 0;
+  const scoreCategory = healthScore?.category ?? "-";
 
   return (
     <div className="space-y-6">

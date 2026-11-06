@@ -1,6 +1,25 @@
 // frontend/src/services/transactionService.ts
 import { apiRequest } from './api';
 
+export interface SaleDetailItem {
+  id: string;
+  productId: string;
+  productName: string;
+  productCategory?: string;
+  qty: number;
+  priceAtSale: number;
+  subtotal: number;
+}
+
+export interface SaleDetail {
+  id: string;
+  receiptCode: string;
+  total: number;
+  paymentMethod?: string;
+  createdAt?: string;
+  items: SaleDetailItem[];
+}
+
 export interface TransactionItem {
   id: string;
   date: string;
@@ -13,6 +32,7 @@ export interface TransactionItem {
   status?: string;
   userId?: string;
   createdAt?: string;
+  sale?: SaleDetail | null;
 }
 
 export interface TransactionSummary {

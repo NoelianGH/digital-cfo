@@ -97,55 +97,44 @@ function healthScore(saldo, meanPengeluaran, totalPenjualan, totalPengeluaran, c
   const ta = fuzzyTrendAnalysis(currentPenjualan, lastPenjualan);
   const rules = [];
   
-  // R1: IF PENDEK AND RENDAH AND TURUN THEN KRITIS
-  const a1 = Math.min(cr.pendek, ue.rendah, ta.turun);
-  const z1 = getZDown(a1, 0, 100);
-  rules.push({ alpha: a1, z: z1 });
+  // --- KELOMPOK CASH RUNWAY: PENDEK (R1 - R9) ---
+  const a1 = Math.min(cr.pendek, ue.rendah, ta.turun); rules.push({ alpha: a1, z: getZDown(a1, 0, 100) });
+  const a2 = Math.min(cr.pendek, ue.rendah, ta.stabil); rules.push({ alpha: a2, z: getZDown(a2, 0, 100) });
+  const a3 = Math.min(cr.pendek, ue.rendah, ta.naik);   rules.push({ alpha: a3, z: getZDown(a3, 0, 100) });
+  
+  const a4 = Math.min(cr.pendek, ue.sedang, ta.turun); rules.push({ alpha: a4, z: getZDown(a4, 0, 100) });
+  const a5 = Math.min(cr.pendek, ue.sedang, ta.stabil); rules.push({ alpha: a5, z: getZDown(a5, 0, 100) });
+  const a6 = Math.min(cr.pendek, ue.sedang, ta.naik);   rules.push({ alpha: a6, z: getZUp(a6, 30, 70) });
 
-  // R2: IF PENDEK AND RENDAH AND NAIK THEN KRITIS
-  const a2 = Math.min(cr.pendek, ue.rendah, ta.naik);
-  const z2 = getZDown(a2, 0, 100);
-  rules.push({ alpha: a2, z: z2 });
+  const a7 = Math.min(cr.pendek, ue.tinggi, ta.turun); rules.push({ alpha: a7, z: getZDown(a7, 0, 100) });
+  const a8 = Math.min(cr.pendek, ue.tinggi, ta.stabil); rules.push({ alpha: a8, z: getZUp(a8, 30, 70) });
+  const a9 = Math.min(cr.pendek, ue.tinggi, ta.naik);   rules.push({ alpha: a9, z: getZUp(a9, 30, 70) });
 
-  // R3: IF PENDEK AND TINGGI AND TURUN THEN KRITIS
-  const a3 = Math.min(cr.pendek, ue.tinggi, ta.turun);
-  const z3 = getZDown(a3, 0, 100);
-  rules.push({ alpha: a3, z: z3 });
+  // --- KELOMPOK CASH RUNWAY: SEDANG (R10 - R18) ---
+  const a10 = Math.min(cr.sedang, ue.rendah, ta.turun); rules.push({ alpha: a10, z: getZDown(a10, 0, 100) });
+  const a11 = Math.min(cr.sedang, ue.rendah, ta.stabil);rules.push({ alpha: a11, z: getZUp(a11, 30, 70) });
+  const a12 = Math.min(cr.sedang, ue.rendah, ta.naik);  rules.push({ alpha: a12, z: getZUp(a12, 30, 70) });
 
-  // R4: IF PENDEK AND TINGGI AND NAIK THEN WASPADA
-  const a4 = Math.min(cr.pendek, ue.tinggi, ta.naik);
-  const z4 = getZUp(a4, 30, 70); // rentang tengah
-  rules.push({ alpha: a4, z: z4 });
+  const a13 = Math.min(cr.sedang, ue.sedang, ta.turun); rules.push({ alpha: a13, z: getZUp(a13, 30, 70) });
+  const a14 = Math.min(cr.sedang, ue.sedang, ta.stabil);rules.push({ alpha: a14, z: getZUp(a14, 30, 70) });
+  const a15 = Math.min(cr.sedang, ue.sedang, ta.naik);  rules.push({ alpha: a15, z: getZUp(a15, 0, 100) }); // SEHAT
 
-  // R5: IF SEDANG AND SEDANG AND STABIL THEN WASPADA
-  const a5 = Math.min(cr.sedang, ue.sedang, ta.stabil);
-  const z5 = getZUp(a5, 30, 70);
-  rules.push({ alpha: a5, z: z5 });
+  const a16 = Math.min(cr.sedang, ue.tinggi, ta.turun); rules.push({ alpha: a16, z: getZUp(a16, 30, 70) });
+  const a17 = Math.min(cr.sedang, ue.tinggi, ta.stabil);rules.push({ alpha: a17, z: getZUp(a17, 0, 100) });
+  const a18 = Math.min(cr.sedang, ue.tinggi, ta.naik);  rules.push({ alpha: a18, z: getZUp(a18, 0, 100) });
 
-  // R6: IF SEDANG AND RENDAH AND TURUN THEN KRITIS
-  const a6 = Math.min(cr.sedang, ue.rendah, ta.turun);
-  const z6 = getZDown(a6, 0, 100);
-  rules.push({ alpha: a6, z: z6 });
+  // --- KELOMPOK CASH RUNWAY: PANJANG (R19 - R27) ---
+  const a19 = Math.min(cr.panjang, ue.rendah, ta.turun); rules.push({ alpha: a19, z: getZUp(a19, 30, 70) });
+  const a20 = Math.min(cr.panjang, ue.rendah, ta.stabil);rules.push({ alpha: a20, z: getZUp(a20, 30, 70) });
+  const a21 = Math.min(cr.panjang, ue.rendah, ta.naik);  rules.push({ alpha: a21, z: getZUp(a21, 0, 100) });
 
-  // R7: IF SEDANG AND TINGGI AND NAIK THEN SEHAT
-  const a7 = Math.min(cr.sedang, ue.tinggi, ta.naik);
-  const z7 = getZUp(a7, 0, 100);
-  rules.push({ alpha: a7, z: z7 });
+  const a22 = Math.min(cr.panjang, ue.sedang, ta.turun); rules.push({ alpha: a22, z: getZUp(a22, 30, 70) });
+  const a23 = Math.min(cr.panjang, ue.sedang, ta.stabil);rules.push({ alpha: a23, z: getZUp(a23, 0, 100) });
+  const a24 = Math.min(cr.panjang, ue.sedang, ta.naik);  rules.push({ alpha: a24, z: getZUp(a24, 0, 100) });
 
-  // R8: IF PANJANG AND RENDAH AND TURUN THEN WASPADA
-  const a8 = Math.min(cr.panjang, ue.rendah, ta.turun);
-  const z8 = getZUp(a8, 30, 70);
-  rules.push({ alpha: a8, z: z8 });
-
-  // R9: IF PANJANG AND SEDANG AND STABIL THEN SEHAT
-  const a9 = Math.min(cr.panjang, ue.sedang, ta.stabil);
-  const z9 = getZUp(a9, 0, 100);
-  rules.push({ alpha: a9, z: z9 });
-
-  // R10: IF PANJANG AND TINGGI AND NAIK THEN SEHAT
-  const a10 = Math.min(cr.panjang, ue.tinggi, ta.naik);
-  const z10 = getZUp(a10, 0, 100);
-  rules.push({ alpha: a10, z: z10 });
+  const a25 = Math.min(cr.panjang, ue.tinggi, ta.turun); rules.push({ alpha: a25, z: getZUp(a25, 0, 100) });
+  const a26 = Math.min(cr.panjang, ue.tinggi, ta.stabil);rules.push({ alpha: a26, z: getZUp(a26, 0, 100) });
+  const a27 = Math.min(cr.panjang, ue.tinggi, ta.naik);  rules.push({ alpha: a27, z: getZUp(a27, 0, 100) });
 
   let totalAlphaZ = 0;
   let totalAlpha = 0;
@@ -155,10 +144,8 @@ function healthScore(saldo, meanPengeluaran, totalPenjualan, totalPengeluaran, c
     totalAlpha += r.alpha;
   }
 
-  // Jika semua alpha bernilai 0 (kondisi di luar batas), beri nilai default 50 (Waspada)
   const finalScore = totalAlpha > 0 ? (totalAlphaZ / totalAlpha) : 50;
 
-  // Tentukan label kategori akhir
   let category = 'WASPADA';
   if (finalScore <= 40) {
     category = 'KRITIS';
@@ -167,7 +154,7 @@ function healthScore(saldo, meanPengeluaran, totalPenjualan, totalPengeluaran, c
   }
 
   return {
-    score: parseFloat(finalScore.toFixed(2)), // bulatkan 2 desimal (misal: 78.45)
+    score: parseFloat(finalScore.toFixed(2)),
     category: category,
     indicators: {
       cashRunwayBulan: cr.runwayBulan,

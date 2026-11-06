@@ -1,0 +1,336 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 1200" width="100%" height="100%" style="background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="userGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+    <linearGradient id="posGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="analyticsGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#6d28d9" />
+    </linearGradient>
+    <linearGradient id="sawGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+    <linearGradient id="miscGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ec4899" />
+      <stop offset="100%" stop-color="#be185d" />
+    </linearGradient>
+
+    <!-- Drop Shadow Filter -->
+    <filter id="shadow" x="-5%" y="-5%" width="115%" height="115%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.45" />
+    </filter>
+
+    <!-- Arrow markers -->
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b" />
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8" />
+    </marker>
+    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34d399" />
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#c084fc" />
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#fbbf24" />
+    </marker>
+  </defs>
+
+  <!-- Title & Legend Header -->
+  <g id="header">
+    <text x="50" y="55" fill="#f8fafc" font-size="28" font-weight="bold" letter-spacing="0.5">Digital CFO — Database Entity Relationship Diagram (ERD)</text>
+    <text x="50" y="85" fill="#94a3b8" font-size="14">Prisma PostgreSQL Schema Relationships &amp; Foreign Keys</text>
+  </g>
+
+  <!-- CONNECTOR PATHS (Drawn beneath cards) -->
+  <g id="connectors" stroke-width="2" fill="none" opacity="0.85">
+    <!-- User -> Stores (left-top) -->
+    <path d="M 690 470 C 580 470, 500 240, 360 240" stroke="#38bdf8" marker-end="url(#arrow-blue)" />
+    <!-- User -> Transactions (left-middle) -->
+    <path d="M 690 510 C 560 510, 520 420, 360 420" stroke="#38bdf8" marker-end="url(#arrow-blue)" />
+    <!-- User -> Products (left-bottom) -->
+    <path d="M 690 560 C 560 560, 520 650, 360 650" stroke="#38bdf8" marker-end="url(#arrow-blue)" />
+    <!-- User -> Promos (left-far-bottom) -->
+    <path d="M 690 600 C 540 600, 480 920, 360 920" stroke="#38bdf8" marker-end="url(#arrow-blue)" />
+
+    <!-- Products -> SaleItems -->
+    <path d="M 230 760 C 230 820, 230 820, 230 870" stroke="#34d399" marker-end="url(#arrow-emerald)" />
+    <!-- Sales -> SaleItems -->
+    <path d="M 450 960 L 360 960" stroke="#34d399" stroke-dasharray="4,4" marker-end="url(#arrow-emerald)" />
+    <!-- Sales -> Transactions (TransactionId link) -->
+    <path d="M 570 870 C 570 600, 340 540, 270 540" stroke="#64748b" stroke-dasharray="3,3" marker-end="url(#arrow)" />
+
+    <!-- User -> Financial Indicators (right-top) -->
+    <path d="M 970 480 C 1080 480, 1100 220, 1180 220" stroke="#38bdf8" marker-end="url(#arrow-blue)" />
+    <!-- User -> Health Scores (right-mid) -->
+    <path d="M 970 520 C 1080 520, 1100 450, 1180 450" stroke="#38bdf8" marker-end="url(#arrow-blue)" />
+    <!-- Financial Indicators -> Health Scores -->
+    <path d="M 1320 310 L 1320 370" stroke="#c084fc" marker-end="url(#arrow-purple)" />
+
+    <!-- Health Scores -> Recommended Actions -->
+    <path d="M 1320 540 L 1320 620" stroke="#fbbf24" marker-end="url(#arrow-amber)" />
+
+    <!-- Actions -> Recommended Actions -->
+    <path d="M 1250 870 C 1250 780, 1260 770, 1260 750" stroke="#fbbf24" marker-end="url(#arrow-amber)" />
+
+    <!-- Actions -> Action Feedback -->
+    <path d="M 1430 940 L 1490 940" stroke="#fbbf24" marker-end="url(#arrow-amber)" />
+    <!-- User -> Action Feedback -->
+    <path d="M 970 570 C 1140 570, 1380 840, 1490 890" stroke="#38bdf8" stroke-dasharray="4,4" marker-end="url(#arrow-blue)" />
+
+    <!-- User -> Feedbacks -->
+    <path d="M 830 680 C 830 830, 800 850, 800 900" stroke="#38bdf8" marker-end="url(#arrow-blue)" />
+    <!-- User -> Alerts -->
+    <path d="M 870 680 C 870 780, 990 820, 990 890" stroke="#38bdf8" marker-end="url(#arrow-blue)" />
+  </g>
+
+  <!-- ==================== CENTRAL NODE: USERS ==================== -->
+  <g id="table-users" transform="translate(690, 420)" filter="url(#shadow)">
+    <rect width="280" height="260" rx="12" fill="#1e293b" stroke="#3b82f6" stroke-width="2" />
+    <rect width="280" height="42" rx="12" fill="url(#userGrad)" />
+    <rect width="280" height="12" y="30" fill="url(#userGrad)" />
+    <text x="140" y="27" fill="#ffffff" font-size="16" font-weight="bold" text-anchor="middle">users (User)</text>
+    <g transform="translate(18, 62)" font-size="12" fill="#cbd5e1" font-family="monospace">
+      <text y="0" fill="#38bdf8" font-weight="bold">PK  id           : String (UUID)</text>
+      <text y="22">    name         : String</text>
+      <text y="44">UQ  email        : String</text>
+      <text y="66">    password     : String (Hash)</text>
+      <text y="88">    businessName : String?</text>
+      <text y="110">    role         : Role (USER/ADMIN)</text>
+      <text y="132">    createdAt    : DateTime</text>
+      <text y="154">    updatedAt    : DateTime</text>
+    </g>
+  </g>
+
+  <!-- ==================== LEFT WING: POS & FINANCES ==================== -->
+
+  <!-- Stores Table -->
+  <g id="table-stores" transform="translate(100, 140)" filter="url(#shadow)">
+    <rect width="260" height="200" rx="10" fill="#1e293b" stroke="#10b981" stroke-width="1.5" />
+    <rect width="260" height="36" rx="10" fill="url(#posGrad)" />
+    <rect width="260" height="10" y="26" fill="url(#posGrad)" />
+    <text x="130" y="23" fill="#ffffff" font-size="14" font-weight="bold" text-anchor="middle">stores (Store)</text>
+    <g transform="translate(15, 54)" font-size="11" fill="#cbd5e1" font-family="monospace">
+      <text y="0" fill="#34d399" font-weight="bold">PK  id           : String (UUID)</text>
+      <text y="19" fill="#38bdf8">FK  userId       : String?</text>
+      <text y="38">    name         : String</text>
+      <text y="57">    ownerName    : String</text>
+      <text y="76">    category     : String</text>
+      <text y="95">    status       : String</text>
+      <text y="114">    productCount : Int</text>
+    </g>
+  </g>
+
+  <!-- Transactions Table -->
+  <g id="table-transactions" transform="translate(100, 370)" filter="url(#shadow)">
+    <rect width="260" height="200" rx="10" fill="#1e293b" stroke="#10b981" stroke-width="1.5" />
+    <rect width="260" height="36" rx="10" fill="url(#posGrad)" />
+    <rect width="260" height="10" y="26" fill="url(#posGrad)" />
+    <text x="130" y="23" fill="#ffffff" font-size="14" font-weight="bold" text-anchor="middle">transactions (Kas)</text>
+    <g transform="translate(15, 54)" font-size="11" fill="#cbd5e1" font-family="monospace">
+      <text y="0" fill="#34d399" font-weight="bold">PK  id            : String</text>
+      <text y="19" fill="#38bdf8">FK  userId        : String</text>
+      <text y="38">    date          : DateTime</text>
+      <text y="57">    amount        : Float</text>
+      <text y="76">    type          : MASUK|KELUAR|MODAL</text>
+      <text y="95">    category      : PENJUALAN|...</text>
+      <text y="114">    source        : MANUAL|OCR|VOICE|POS</text>
+      <text y="133">    paymentMethod : TUNAI|QRIS|...</text>
+    </g>
+  </g>
+
+  <!-- Products Table -->
+  <g id="table-products" transform="translate(100, 600)" filter="url(#shadow)">
+    <rect width="260" height="160" rx="10" fill="#1e293b" stroke="#10b981" stroke-width="1.5" />
+    <rect width="260" height="36" rx="10" fill="url(#posGrad)" />
+    <rect width="260" height="10" y="26" fill="url(#posGrad)" />
+    <text x="130" y="23" fill="#ffffff" font-size="14" font-weight="bold" text-anchor="middle">products (Product)</text>
+    <g transform="translate(15, 54)" font-size="11" fill="#cbd5e1" font-family="monospace">
+      <text y="0" fill="#34d399" font-weight="bold">PK  id       : String</text>
+      <text y="19" fill="#38bdf8">FK  userId   : String</text>
+      <text y="38">    name     : String</text>
+      <text y="57">    category : ProductCategory</text>
+      <text y="76">    price    : Float</text>
+      <text y="95">    stock    : Int</text>
+    </g>
+  </g>
+
+  <!-- SaleItems Table -->
+  <g id="table-saleitems" transform="translate(100, 870)" filter="url(#shadow)">
+    <rect width="260" height="150" rx="10" fill="#1e293b" stroke="#10b981" stroke-width="1.5" />
+    <rect width="260" height="36" rx="10" fill="url(#posGrad)" />
+    <rect width="260" height="10" y="26" fill="url(#posGrad)" />
+    <text x="130" y="23" fill="#ffffff" font-size="14" font-weight="bold" text-anchor="middle">sale_items (Detail POS)</text>
+    <g transform="translate(15, 54)" font-size="11" fill="#cbd5e1" font-family="monospace">
+      <text y="0" fill="#34d399" font-weight="bold">PK  id          : String</text>
+      <text y="19" fill="#34d399">FK  productId   : String</text>
+      <text y="38" fill="#34d399">FK  saleId      : String</text>
+      <text y="57">    qty         : Int</text>
+      <text y="76">    priceAtSale : Float</text>
+      <text y="95">    subtotal    : Float</text>
+    </g>
+  </g>
+
+  <!-- Sales Table -->
+  <g id="table-sales" transform="translate(450, 870)" filter="url(#shadow)">
+    <rect width="240" height="150" rx="10" fill="#1e293b" stroke="#10b981" stroke-width="1.5" />
+    <rect width="240" height="36" rx="10" fill="url(#posGrad)" />
+    <rect width="240" height="10" y="26" fill="url(#posGrad)" />
+    <text x="120" y="23" fill="#ffffff" font-size="14" font-weight="bold" text-anchor="middle">sales (Transaksi POS)</text>
+    <g transform="translate(15, 54)" font-size="11" fill="#cbd5e1" font-family="monospace">
+      <text y="0" fill="#34d399" font-weight="bold">PK  id            : String</text>
+      <text y="19">UQ  receiptCode   : String</text>
+      <text y="38">    total         : Float</text>
+      <text y="57">    paymentMethod : PaymentMethod</text>
+      <text y="76" fill="#94a3b8">    transactionId : String?</text>
+    </g>
+  </g>
+
+  <!-- Promos Table -->
+  <g id="table-promos" transform="translate(100, 1040)" filter="url(#shadow)">
+    <rect width="260" height="130" rx="10" fill="#1e293b" stroke="#ec4899" stroke-width="1.5" />
+    <rect width="260" height="34" rx="10" fill="url(#miscGrad)" />
+    <rect width="260" height="10" y="24" fill="url(#miscGrad)" />
+    <text x="130" y="22" fill="#ffffff" font-size="13" font-weight="bold" text-anchor="middle">promos (Promo Diskon)</text>
+    <g transform="translate(15, 50)" font-size="11" fill="#cbd5e1" font-family="monospace">
+      <text y="0" fill="#f472b6" font-weight="bold">PK  id        : String</text>
+      <text y="19" fill="#38bdf8">FK  userId    : String</text>
+      <text y="38">    title     : String</text>
+      <text y="57">    type/val  : PromoType / Float</text>
+      <text y="76">    status    : AKTIF|NON_AKTIF</text>
+    </g>
+  </g>
+
+  <!-- ==================== RIGHT WING: ANALYTICS & DSS (SAW) ==================== -->
+
+  <!-- Financial Indicators Table -->
+  <g id="table-indicators" transform="translate(1180, 140)" filter="url(#shadow)">
+    <rect width="280" height="170" rx="10" fill="#1e293b" stroke="#8b5cf6" stroke-width="1.5" />
+    <rect width="280" height="36" rx="10" fill="url(#analyticsGrad)" />
+    <rect width="280" height="10" y="26" fill="url(#analyticsGrad)" />
+    <text x="140" y="23" fill="#ffffff" font-size="14" font-weight="bold" text-anchor="middle">financial_indicators</text>
+    <g transform="translate(15, 54)" font-size="11" fill="#cbd5e1" font-family="monospace">
+      <text y="0" fill="#c084fc" font-weight="bold">PK  id             : String</text>
+      <text y="19" fill="#38bdf8">FK  userId         : String</text>
+      <text y="38">    cash_runway    : Float (Bulan)</text>
+      <text y="57">    unit_economics : Float (%)</text>
+      <text y="76">    trend_analysis : Float (%)</text>
+      <text y="95">    period_start/end: DateTime</text>
+    </g>
+  </g>
+
+  <!-- Health Scores Table -->
+  <g id="table-health" transform="translate(1180, 370)" filter="url(#shadow)">
+    <rect width="280" height="170" rx="10" fill="#1e293b" stroke="#8b5cf6" stroke-width="1.5" />
+    <rect width="280" height="36" rx="10" fill="url(#analyticsGrad)" />
+    <rect width="280" height="10" y="26" fill="url(#analyticsGrad)" />
+    <text x="140" y="23" fill="#ffffff" font-size="14" font-weight="bold" text-anchor="middle">health_scores (Kesehatan)</text>
+    <g transform="translate(15, 54)" font-size="11" fill="#cbd5e1" font-family="monospace">
+      <text y="0" fill="#c084fc" font-weight="bold">PK  id           : String</text>
+      <text y="19" fill="#38bdf8">FK  userId       : String</text>
+      <text y="38" fill="#c084fc">FK  indicatorsId : String</text>
+      <text y="57">    score        : Float (1-100)</text>
+      <text y="76">    category     : KRITIS|WASPADA|SEHAT</text>
+      <text y="95">    createdAt    : DateTime</text>
+    </g>
+  </g>
+
+  <!-- Recommended Actions Table (SAW Results) -->
+  <g id="table-recom" transform="translate(1180, 620)" filter="url(#shadow)">
+    <rect width="280" height="130" rx="10" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5" />
+    <rect width="280" height="36" rx="10" fill="url(#sawGrad)" />
+    <rect width="280" height="10" y="26" fill="url(#sawGrad)" />
+    <text x="140" y="23" fill="#ffffff" font-size="14" font-weight="bold" text-anchor="middle">recommended_actions (SAW)</text>
+    <g transform="translate(15, 54)" font-size="11" fill="#cbd5e1" font-family="monospace">
+      <text y="0" fill="#fbbf24" font-weight="bold">PK  id               : String</text>
+      <text y="19" fill="#c084fc">FK  healthScoreId    : String</text>
+      <text y="38" fill="#fbbf24">FK  actionId         : String</text>
+      <text y="57">    preference_value : Float (V SAW)</text>
+      <text y="76">    rank             : Int (1, 2, 3)</text>
+    </g>
+  </g>
+
+  <!-- Actions Table (Kriteria SAW) -->
+  <g id="table-actions" transform="translate(1130, 870)" filter="url(#shadow)">
+    <rect width="260" height="210" rx="10" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5" />
+    <rect width="260" height="36" rx="10" fill="url(#sawGrad)" />
+    <rect width="260" height="10" y="26" fill="url(#sawGrad)" />
+    <text x="130" y="23" fill="#ffffff" font-size="14" font-weight="bold" text-anchor="middle">actions (Bank Rekomendasi)</text>
+    <g transform="translate(15, 54)" font-size="11" fill="#cbd5e1" font-family="monospace">
+      <text y="0" fill="#fbbf24" font-weight="bold">PK  id                : String</text>
+      <text y="19">    title             : String</text>
+      <text y="38">    trigger_condition : String</text>
+      <text y="57">    impact_score      : Float (C1)</text>
+      <text y="76">    urgency_score     : Float (C2)</text>
+      <text y="95">    ease_score        : Float (C3)</text>
+      <text y="114">    cost_score        : Float (C4)</text>
+    </g>
+  </g>
+
+  <!-- Action Feedback Table -->
+  <g id="table-actionfeedback" transform="translate(1440, 870)" filter="url(#shadow)">
+    <rect width="220" height="150" rx="10" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5" />
+    <rect width="220" height="36" rx="10" fill="url(#sawGrad)" />
+    <rect width="220" height="10" y="26" fill="url(#sawGrad)" />
+    <text x="110" y="23" fill="#ffffff" font-size="13" font-weight="bold" text-anchor="middle">action_feedback</text>
+    <g transform="translate(15, 54)" font-size="11" fill="#cbd5e1" font-family="monospace">
+      <text y="0" fill="#fbbf24" font-weight="bold">PK  id       : String</text>
+      <text y="19" fill="#fbbf24">FK  actionId : String</text>
+      <text y="38" fill="#38bdf8">FK  userId   : String</text>
+      <text y="57">    rating   : FeedbackRating</text>
+      <text y="76">    feedback : String?</text>
+    </g>
+  </g>
+
+  <!-- ==================== BOTTOM UTILITY TABLES ==================== -->
+
+  <!-- Feedbacks Table -->
+  <g id="table-feedbacks" transform="translate(680, 890)" filter="url(#shadow)">
+    <rect width="210" height="130" rx="10" fill="#1e293b" stroke="#ec4899" stroke-width="1.5" />
+    <rect width="210" height="34" rx="10" fill="url(#miscGrad)" />
+    <rect width="210" height="10" y="24" fill="url(#miscGrad)" />
+    <text x="105" y="22" fill="#ffffff" font-size="13" font-weight="bold" text-anchor="middle">feedbacks (Kritik/Saran)</text>
+    <g transform="translate(15, 50)" font-size="11" fill="#cbd5e1" font-family="monospace">
+      <text y="0" fill="#f472b6" font-weight="bold">PK  id      : String</text>
+      <text y="19" fill="#38bdf8">FK  userId  : String</text>
+      <text y="38">    rating  : POOR|GOOD|...</text>
+      <text y="57">    comment : String?</text>
+    </g>
+  </g>
+
+  <!-- Alerts Table -->
+  <g id="table-alerts" transform="translate(910, 890)" filter="url(#shadow)">
+    <rect width="200" height="130" rx="10" fill="#1e293b" stroke="#ec4899" stroke-width="1.5" />
+    <rect width="200" height="34" rx="10" fill="url(#miscGrad)" />
+    <rect width="200" height="10" y="24" fill="url(#miscGrad)" />
+    <text x="100" y="22" fill="#ffffff" font-size="13" font-weight="bold" text-anchor="middle">alerts (Notifikasi)</text>
+    <g transform="translate(15, 50)" font-size="11" fill="#cbd5e1" font-family="monospace">
+      <text y="0" fill="#f472b6" font-weight="bold">PK  id      : String</text>
+      <text y="19" fill="#38bdf8">FK  userId  : String</text>
+      <text y="38">    type    : AlertType</text>
+      <text y="57">    status  : OPEN|RESOLVED</text>
+    </g>
+  </g>
+
+  <!-- Legend -->
+  <g id="legend" transform="translate(1180, 50)">
+    <rect width="470" height="50" rx="8" fill="#1e293b" stroke="#334155" />
+    <circle cx="25" cy="25" r="7" fill="#3b82f6" />
+    <text x="40" y="29" fill="#e2e8f0" font-size="12">Core User</text>
+    <circle cx="125" cy="25" r="7" fill="#10b981" />
+    <text x="140" y="29" fill="#e2e8f0" font-size="12">POS / Kas</text>
+    <circle cx="225" cy="25" r="7" fill="#8b5cf6" />
+    <text x="240" y="29" fill="#e2e8f0" font-size="12">Kesehatan AI</text>
+    <circle cx="345" cy="25" r="7" fill="#f59e0b" />
+    <text x="360" y="29" fill="#e2e8f0" font-size="12">Rekomendasi SAW</text>
+  </g>
+</svg>
